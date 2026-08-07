@@ -139,15 +139,7 @@ docker compose --profile app --profile test run --rm e2e-test
 docker compose --profile app --profile test down -v
 ```
 
-The browser runner uses Chromium from its container image rather than a host browser cache. The repository-level Playwright tests are organized under `e2e/`:
-
-```text
-e2e/
-  helpers/
-  playwright.config.ts
-  preflight.spec.ts
-  smoke.spec.ts
-```
+The browser runner uses Chromium from its container image rather than a host browser cache. 
 
 ## Typecheck, build, and lint
 
@@ -190,6 +182,9 @@ frontend/tests/
 e2e/
   helpers/
   playwright.config.ts
+  preflight.spec.ts
+  smoke.spec.ts
+```
 ```
 
 I used TDD with red/green test cycles and organized the project around open-source tooling, including Minikube and LocalStack, to avoid cloud-provider costs. I worked through the infrastructure decisions and chose nginx plus layered Docker Compose profiles for the application and test stacks.
