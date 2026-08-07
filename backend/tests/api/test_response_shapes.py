@@ -44,6 +44,9 @@ def test_resources_are_direct_objects() -> None:
     statement = AccountStatementResponse(
         account_id="00000000-0000-0000-0000-000000000001",
         lines=[],
+        total=0,
+        limit=100,
+        offset=0,
     )
 
     assert balance.model_dump() == {
@@ -53,6 +56,9 @@ def test_resources_are_direct_objects() -> None:
     assert statement.model_dump() == {
         "account_id": "00000000-0000-0000-0000-000000000001",
         "lines": [],
+        "total": 0,
+        "limit": 100,
+        "offset": 0,
     }
     assert "data" not in balance.model_dump()
     assert "items" not in statement.model_dump()

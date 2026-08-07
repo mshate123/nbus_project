@@ -62,6 +62,9 @@ class StatementLineResponse(APIModel):
 class AccountStatementResponse(APIModel):
     account_id: str
     lines: List[StatementLineResponse]
+    total: int
+    limit: int
+    offset: int
 
 
 class AccountResponse(APIModel):

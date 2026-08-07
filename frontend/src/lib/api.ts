@@ -3,7 +3,7 @@
  * All requests go through the /api prefix, proxied by nginx to the backend.
  */
 
-const BASE = "/api";
+const BASE = import.meta.env.VITE_API_BASE ?? "/api";
 
 /** Generic fetch helper — throws on non-2xx responses. */
 async function request<T>(path: string, options?: RequestInit): Promise<T> {
@@ -28,6 +28,7 @@ export interface Account {
   name: string;
   type: "ASSET" | "LIABILITY" | "EQUITY" | "REVENUE" | "EXPENSE";
   normal_balance: "DEBIT" | "CREDIT";
+  rate_tier: "standard" | "premium" | "savings";
   active: boolean;
 }
 
@@ -48,6 +49,9 @@ export interface StatementLine {
 export interface AccountStatement {
   account_id: string;
   lines: StatementLine[];
+  total: number;
+  limit: number;
+  offset: number;
 }
 
 export interface RateScheduleEntry {
@@ -66,8 +70,18 @@ export const getBalance = (accountId: string): Promise<BalanceResponse> =>
   request<BalanceResponse>(`/accounts/${accountId}/balance`);
 
 /** Fetch statement with running balance for an account. */
-export const getStatement = (accountId: string): Promise<AccountStatement> =>
-  request<AccountStatement>(`/accounts/${accountId}/statement`);
+export const getStatement = (
+  accountId: string,
+  params?: { limit?: number; offset?: number },
+): Promise<AccountStatement> => {
+  const query = new URLSearchParams();
+  if (params?.limit != null) query.set("limit", String(params.limit));
+  if (params?.offset != null) query.set("offset", String(params.offset));
+  const qs = query.toString();
+  return request<AccountStatement>(
+    `/accounts/${accountId}/statement${qs ? `?${qs}` : ""}`,
+  );
+};
 
 /** Fetch the full interest rate schedule. */
 export const getRateSchedule = (): Promise<RateScheduleEntry[]> =>

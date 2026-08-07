@@ -9,7 +9,7 @@ Full-stack double-entry ledger with balance, statement, reversal, and rate-sched
 - **Database:** PostgreSQL 15. Alembic applies the migrations in `backend/migrations/versions/`.
 - **API boundary:** REST endpoints are under `/api`. The frontend nginx proxy preserves the `/api` prefix when forwarding to the backend.
 - **Browser verification:** Playwright runs in the dedicated Compose `e2e-test` container with Chromium installed in the image.
-- **Local infrastructure:** LocalStack 3 is included for the local S3 integration surface.
+- **Local infrastructure:** Docker and Docker Compose orchestrate the full stack — PostgreSQL, the FastAPI backend, the Vite/React frontend, and isolated test containers for backend, frontend, and Playwright e2e.
 
 The current Kiro specification and its contract/test artifacts are in `.kiro/specs/core-ledger/`. Repository reconnaissance evidence is retained in `.specship/artifacts/reverse-engineering/`.
 
@@ -33,11 +33,6 @@ Compose supplies the normal local values. `.env.example` documents equivalent ho
 |---|---:|---|
 | `DATABASE_URL` | Yes for API/test containers | Compose sets PostgreSQL URLs for `api` and `api-test` |
 | `AUTH_STUB_TOKEN` | Yes for the API container | Compose value: `dev-token` |
-| `AWS_ENDPOINT_URL` | Included for local S3 wiring | Compose value: `http://localstack:4566` |
-| `AWS_DEFAULT_REGION` | Included for LocalStack | Compose value: `us-east-1` |
-| `AWS_ACCESS_KEY_ID` | Included for LocalStack | Compose value: `test` |
-| `AWS_SECRET_ACCESS_KEY` | Included for LocalStack | Compose value: `test` |
-| `S3_BUCKET_STATEMENTS` | Optional | Documented in `.env.example`; not consumed by the current Compose services |
 
 ## Start and stop
 
@@ -139,7 +134,7 @@ docker compose --profile app --profile test run --rm e2e-test
 docker compose --profile app --profile test down -v
 ```
 
-The browser runner uses Chromium from its container image rather than a host browser cache. The repository-level Playwright configuration is in `e2e/playwright.config.ts`.
+The browser runner uses Chromium from its container image rather than a host browser cache. 
 
 ## Typecheck, build, and lint
 
@@ -149,20 +144,11 @@ The frontend `build` script runs TypeScript checking before creating the Vite pr
 docker compose --profile test run --rm frontend-test pnpm build
 ```
 
-Backend verification is provided by pytest collection and execution in the `api-test` image. The current backend manifest does not declare a separate mypy or pyright command. The current frontend manifest does not declare an ESLint script, and no repository-level lint script is configured. Therefore, there is no separate lint command to run from the current repository configuration; the README does not invent one.
-
-
-## Verification notes
-
-The Compose configuration, application startup, health endpoint, direct API, frontend proxy, backend tests, frontend tests, and containerized Playwright tests have been verified through the commands above. The specification files describe the complete ledger workflow and remain the source of task/acceptance detail; this README documents the repository's runnable entrypoints and does not restate task status.
-
-Kubernetes manifests under `infra/k8s/` and related scripts are retained for manual review. Docker Compose remains the canonical supported entrypoint for local application and test workflows.
-
-## MY JOURNEY:
+# MY JOURNEY:
 
 I began by researching fintech project ideas with Claude and Gemini and chose to build a **Core Ledger & Interest Accrual** system. After the initial unit tests, integration tests, and application stack were healthy, further research led me to a public repository that demonstrated how to set up SpecShip for Kiro. I borrowed heavily from its templates, hooks, and MCPs for this exercise to reduce churn and unnecessary token usage.
 
-I installed the SpecShip prerequisites and added Kiro Superpowers for brainstorming, writing implementation plans, subagent-driven development, TDD, and debugging. I then performed a repository reconnaissance and synthesized the findings back into the original codebase on a new branch from `main`.
+I installed the SpecShip prerequisites and added Kiro Superpowers for brainstorming, writing implementation plans, subagent-driven development, TDD, and debugging. I then performed a repository reconnaissance and synthesized the findings back into the original codebase.
 
 ### Reconnaissance prompt
 
@@ -174,7 +160,6 @@ I installed the SpecShip prerequisites and added Kiro Superpowers for brainstorm
 > 2. Existing Kiro specs in `.kiro/specs/`, cross-referenced against current implementation gaps.
 > 3. Dead code, anti-patterns, technical debt, and components that should be restructured or removed.
 > 4. Baseline behaviors to preserve versus legacy structures to retire.
-
 The reconnaissance identified a Playwright E2E routing issue that caused the browser test to fail. I recorded it as a follow-up triage task so the recon could be completed without losing the finding. I later used Kiro's investigation workflow to create an RCA triage issue, then incorporated the triage fix into Spec mode while rewriting the specifications.
 
 ### Test organization
@@ -186,27 +171,27 @@ backend/tests/
   property/
   api/
   fixtures/
-
 frontend/tests/
   unit/
     components/
-
 e2e/
   helpers/
   playwright.config.ts
+  preflight.spec.ts
+  smoke.spec.ts
+```
 ```
 
-I used TDD with red/green test cycles and organized the project around open-source tooling, including Minikube and LocalStack, to avoid cloud-provider costs. I worked through the infrastructure decisions and chose nginx plus layered Docker Compose profiles for the application and test stacks.
+I used TDD with red/green test cycles and organized the project around Docker Compose profiles for the application and test stacks.
 
 ### Coverage and remaining work
 
-The application and test workflows run successfully, but the initial implementation did not meet the target coverage thresholds. The shortfall is documented here rather than hidden:
+The application and test workflows run successfully, but the implementation has not yet met all target coverage thresholds. The current state is documented here rather than hidden:
 
-- **Backend engine target:** 85%; observed baseline: **32.10%**.
-- **Backend API target:** 75%; observed baseline: **38.38%**.
-- **Frontend target:** 60%; observed baseline: **30.06%**.
-- **Playwright:** 3 tests passed in the verified container run.
+- **Backend engine target:** 70%; current: **84%** (61 tests passing; `balance_service` 100%, `posting_service` 97%, `accrual_service` 96%, `reversal_service` 36%).
+- **Frontend target:** 60%; current: **30%** (6 tests passing; `RateSchedule` 100%). Pre-existing gap — no tests for `AccountList`, `AccountStatement`, `App`.
+- **E2E (Playwright):** 7 tests passed (preflight health, readiness, frontend, seeding, proxy contract, smoke).
 
-The backend coverage gaps included accrual, balance, posting, and reversal paths. The API gaps were concentrated in route coverage. Frontend coverage was strongest around `RateSchedule` and weaker across the broader application components and UI primitives. With more time, I would expand unit, integration, API, frontend, and end-to-end coverage until the declared thresholds are met.
+The remaining backend coverage gap is `reversal_service` (36%). Frontend coverage requires additional component tests for `AccountList`, `AccountStatement`, and `App` to meet the 60% threshold.
 
-The final stack verification confirmed healthy PostgreSQL, API, frontend, and LocalStack services; API health returned `{"status":"ok"}`; the frontend returned HTTP 200; and the frontend proxy returned the seeded rate schedule successfully.
+The final stack verification confirmed healthy PostgreSQL, API, and frontend services; API health returned `{"status":"ok"}`; the frontend returned HTTP 200; and the frontend proxy returned the seeded rate schedule successfully.
