@@ -1,0 +1,3 @@
+?? .kiro/hooks/specship-no-inline-styles.kiro.hook
+?? .kiro/hooks/specship-tdd-test-on-save.kiro.hook
+?? .kiro/hooks/specship-validate-on-demand.kiro.hook

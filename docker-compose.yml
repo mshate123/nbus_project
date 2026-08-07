@@ -1,0 +1,113 @@
+# Base services — shared by app and test stacks.
+# Run the app:   docker-compose --profile app up --build
+# Run tests:     docker-compose --profile test run --rm api-test
+#                docker-compose --profile test run --rm frontend-test
+
+services:
+
+  # ── Infrastructure ──────────────────────────────────────────────────────────
+
+  postgres:
+    image: postgres:15-alpine
+    environment:
+      POSTGRES_USER: ledger
+      POSTGRES_PASSWORD: ledger
+      POSTGRES_DB: ledger
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./docker/postgres-init:/docker-entrypoint-initdb.d:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ledger"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  localstack:
+    image: localstack/localstack:3
+    environment:
+      SERVICES: s3
+      DEFAULT_REGION: us-east-1
+      LOCALSTACK_HOST: localstack
+    ports:
+      - "4566:4566"
+    volumes:
+      - localstack_data:/var/lib/localstack
+
+  # ── App stack (profile: app) ─────────────────────────────────────────────
+
+  api:
+    profiles: [app]
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+      target: app
+    environment:
+      DATABASE_URL: postgresql+asyncpg://ledger:ledger@postgres:5432/ledger
+      AWS_ENDPOINT_URL: http://localstack:4566
+      AWS_DEFAULT_REGION: us-east-1
+      AWS_ACCESS_KEY_ID: test
+      AWS_SECRET_ACCESS_KEY: test
+      AUTH_STUB_TOKEN: dev-token
+    ports:
+      - "8000:8000"
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  frontend:
+    profiles: [app]
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+      target: prod
+    ports:
+      - "3000:80"
+    depends_on:
+      - api
+
+  # ── Test stack (profile: test) ────────────────────────────────────────────
+
+  api-test:
+    profiles: [test]
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+      target: test
+    environment:
+      DATABASE_URL: postgresql+asyncpg://ledger:ledger@postgres:5432/ledger_test
+      AWS_ENDPOINT_URL: http://localstack:4566
+      AWS_DEFAULT_REGION: us-east-1
+      AWS_ACCESS_KEY_ID: test
+      AWS_SECRET_ACCESS_KEY: test
+    command: ["sh", "-c", "alembic upgrade head && pytest --cov=engine --cov-report=term-missing --cov-fail-under=20 -v"]
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  frontend-test:
+    profiles: [test]
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+      target: test
+
+  e2e-test:
+    profiles: [test]
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+      target: test
+    command: ["pnpm", "exec", "playwright", "test", "--config", "/e2e/playwright.config.ts", "--reporter=line"]
+    volumes:
+      - ./e2e:/e2e:ro
+    environment:
+      E2E_BASE_URL: http://frontend
+    depends_on:
+      frontend:
+        condition: service_started
+
+volumes:
+  postgres_data:
+  localstack_data:
