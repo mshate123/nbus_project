@@ -1,0 +1,444 @@
+{
+  "pbtResults": {},
+  "executionHistory": {
+    "0.1 Establish backend/frontend test entrypoints and typed settings.": [
+      {
+        "executionId": "134c5128-d629-4c74-8e9e-8efc9a8a8612",
+        "chatSessionId": "sess_4023ec58-bf52-4566-b6fe-e9c8118bf939",
+        "timestamp": 1786125375381
+      },
+      {
+        "executionId": "134c5128-d629-4c74-8e9e-8efc9a8a8612",
+        "chatSessionId": "sess_4023ec58-bf52-4566-b6fe-e9c8118bf939",
+        "timestamp": 1786125382132
+      },
+      {
+        "executionId": "134c5128-d629-4c74-8e9e-8efc9a8a8612",
+        "chatSessionId": "sess_4023ec58-bf52-4566-b6fe-e9c8118bf939",
+        "timestamp": 1786125554541
+      }
+    ],
+    "0.2 Define the exact API and error contract helpers.": [
+      {
+        "executionId": "134c5128-d629-4c74-8e9e-8efc9a8a8612",
+        "chatSessionId": "sess_4023ec58-bf52-4566-b6fe-e9c8118bf939",
+        "timestamp": 1786125375419
+      },
+      {
+        "executionId": "134c5128-d629-4c74-8e9e-8efc9a8a8612",
+        "chatSessionId": "sess_4023ec58-bf52-4566-b6fe-e9c8118bf939",
+        "timestamp": 1786125384880
+      },
+      {
+        "executionId": "134c5128-d629-4c74-8e9e-8efc9a8a8612",
+        "chatSessionId": "sess_4023ec58-bf52-4566-b6fe-e9c8118bf939",
+        "timestamp": 1786125557315
+      }
+    ],
+    "1.1 Implement Decimal money and posting validation.": [
+      {
+        "executionId": "134c5128-d629-4c74-8e9e-8efc9a8a8612",
+        "chatSessionId": "sess_4023ec58-bf52-4566-b6fe-e9c8118bf939",
+        "timestamp": 1786125375456
+      },
+      {
+        "executionId": "134c5128-d629-4c74-8e9e-8efc9a8a8612",
+        "chatSessionId": "sess_4023ec58-bf52-4566-b6fe-e9c8118bf939",
+        "timestamp": 1786125560366
+      },
+      {
+        "executionId": "134c5128-d629-4c74-8e9e-8efc9a8a8612",
+        "chatSessionId": "sess_4023ec58-bf52-4566-b6fe-e9c8118bf939",
+        "timestamp": 1786127388177
+      },
+      {
+        "executionId": "e1677cf1-6712-408e-851a-24677fcad02a",
+        "chatSessionId": "sess_c758b2e9-d6f0-4f73-8610-046cb5fe9a24",
+        "timestamp": 1786128250126
+      }
+    ],
+    "1.2 Create persistence models and migration constraints.": [
+      {
+        "executionId": "134c5128-d629-4c74-8e9e-8efc9a8a8612",
+        "chatSessionId": "sess_4023ec58-bf52-4566-b6fe-e9c8118bf939",
+        "timestamp": 1786125375516
+      },
+      {
+        "executionId": "134c5128-d629-4c74-8e9e-8efc9a8a8612",
+        "chatSessionId": "sess_4023ec58-bf52-4566-b6fe-e9c8118bf939",
+        "timestamp": 1786125563013
+      },
+      {
+        "executionId": "e1677cf1-6712-408e-851a-24677fcad02a",
+        "chatSessionId": "sess_c758b2e9-d6f0-4f73-8610-046cb5fe9a24",
+        "timestamp": 1786128250195
+      }
+    ],
+    "1.3 Own production bootstrap seeds separately from test factories.": [
+      {
+        "executionId": "134c5128-d629-4c74-8e9e-8efc9a8a8612",
+        "chatSessionId": "sess_4023ec58-bf52-4566-b6fe-e9c8118bf939",
+        "timestamp": 1786125375546
+      },
+      {
+        "executionId": "134c5128-d629-4c74-8e9e-8efc9a8a8612",
+        "chatSessionId": "sess_4023ec58-bf52-4566-b6fe-e9c8118bf939",
+        "timestamp": 1786125565280
+      },
+      {
+        "executionId": "e1677cf1-6712-408e-851a-24677fcad02a",
+        "chatSessionId": "sess_c758b2e9-d6f0-4f73-8610-046cb5fe9a24",
+        "timestamp": 1786128250250
+      }
+    ],
+    "1.4 Implement repository and unit-of-work primitives.": [
+      {
+        "executionId": "134c5128-d629-4c74-8e9e-8efc9a8a8612",
+        "chatSessionId": "sess_4023ec58-bf52-4566-b6fe-e9c8118bf939",
+        "timestamp": 1786125375572
+      },
+      {
+        "executionId": "e1677cf1-6712-408e-851a-24677fcad02a",
+        "chatSessionId": "sess_c758b2e9-d6f0-4f73-8610-046cb5fe9a24",
+        "timestamp": 1786128250285
+      }
+    ],
+    "1.5 Implement mandatory Property 1 test.": [
+      {
+        "executionId": "134c5128-d629-4c74-8e9e-8efc9a8a8612",
+        "chatSessionId": "sess_4023ec58-bf52-4566-b6fe-e9c8118bf939",
+        "timestamp": 1786125375603
+      },
+      {
+        "executionId": "e1677cf1-6712-408e-851a-24677fcad02a",
+        "chatSessionId": "sess_c758b2e9-d6f0-4f73-8610-046cb5fe9a24",
+        "timestamp": 1786128250324
+      }
+    ],
+    "1.6 Checkpoint: verify foundation.": [
+      {
+        "executionId": "134c5128-d629-4c74-8e9e-8efc9a8a8612",
+        "chatSessionId": "sess_4023ec58-bf52-4566-b6fe-e9c8118bf939",
+        "timestamp": 1786125375631
+      },
+      {
+        "executionId": "e1677cf1-6712-408e-851a-24677fcad02a",
+        "chatSessionId": "sess_c758b2e9-d6f0-4f73-8610-046cb5fe9a24",
+        "timestamp": 1786128250359
+      }
+    ],
+    "2.1 Implement posting application service.": [
+      {
+        "executionId": "134c5128-d629-4c74-8e9e-8efc9a8a8612",
+        "chatSessionId": "sess_4023ec58-bf52-4566-b6fe-e9c8118bf939",
+        "timestamp": 1786125375663
+      },
+      {
+        "executionId": "e1677cf1-6712-408e-851a-24677fcad02a",
+        "chatSessionId": "sess_c758b2e9-d6f0-4f73-8610-046cb5fe9a24",
+        "timestamp": 1786128250400
+      }
+    ],
+    "2.2 Implement balance and statement services.": [
+      {
+        "executionId": "134c5128-d629-4c74-8e9e-8efc9a8a8612",
+        "chatSessionId": "sess_4023ec58-bf52-4566-b6fe-e9c8118bf939",
+        "timestamp": 1786125375696
+      },
+      {
+        "executionId": "e1677cf1-6712-408e-851a-24677fcad02a",
+        "chatSessionId": "sess_c758b2e9-d6f0-4f73-8610-046cb5fe9a24",
+        "timestamp": 1786128250441
+      }
+    ],
+    "2.3 Implement mandatory Property 2 test.": [
+      {
+        "executionId": "134c5128-d629-4c74-8e9e-8efc9a8a8612",
+        "chatSessionId": "sess_4023ec58-bf52-4566-b6fe-e9c8118bf939",
+        "timestamp": 1786125375728
+      },
+      {
+        "executionId": "e1677cf1-6712-408e-851a-24677fcad02a",
+        "chatSessionId": "sess_c758b2e9-d6f0-4f73-8610-046cb5fe9a24",
+        "timestamp": 1786128250482
+      }
+    ],
+    "2.4 Checkpoint: verify ledger services.": [
+      {
+        "executionId": "134c5128-d629-4c74-8e9e-8efc9a8a8612",
+        "chatSessionId": "sess_4023ec58-bf52-4566-b6fe-e9c8118bf939",
+        "timestamp": 1786125375756
+      },
+      {
+        "executionId": "e1677cf1-6712-408e-851a-24677fcad02a",
+        "chatSessionId": "sess_c758b2e9-d6f0-4f73-8610-046cb5fe9a24",
+        "timestamp": 1786128250517
+      }
+    ],
+    "3.1 Implement API routes and deterministic error handlers.": [
+      {
+        "executionId": "134c5128-d629-4c74-8e9e-8efc9a8a8612",
+        "chatSessionId": "sess_4023ec58-bf52-4566-b6fe-e9c8118bf939",
+        "timestamp": 1786125375790
+      },
+      {
+        "executionId": "e1677cf1-6712-408e-851a-24677fcad02a",
+        "chatSessionId": "sess_c758b2e9-d6f0-4f73-8610-046cb5fe9a24",
+        "timestamp": 1786128250559
+      }
+    ],
+    "3.2 Implement reversal service and route.": [
+      {
+        "executionId": "134c5128-d629-4c74-8e9e-8efc9a8a8612",
+        "chatSessionId": "sess_4023ec58-bf52-4566-b6fe-e9c8118bf939",
+        "timestamp": 1786125375822
+      },
+      {
+        "executionId": "e1677cf1-6712-408e-851a-24677fcad02a",
+        "chatSessionId": "sess_c758b2e9-d6f0-4f73-8610-046cb5fe9a24",
+        "timestamp": 1786128250596
+      }
+    ],
+    "3.3 Implement mandatory Property 3 test.": [
+      {
+        "executionId": "134c5128-d629-4c74-8e9e-8efc9a8a8612",
+        "chatSessionId": "sess_4023ec58-bf52-4566-b6fe-e9c8118bf939",
+        "timestamp": 1786125375853
+      },
+      {
+        "executionId": "e1677cf1-6712-408e-851a-24677fcad02a",
+        "chatSessionId": "sess_c758b2e9-d6f0-4f73-8610-046cb5fe9a24",
+        "timestamp": 1786128250637
+      }
+    ],
+    "3.4 Checkpoint: verify API and reversal contracts.": [
+      {
+        "executionId": "134c5128-d629-4c74-8e9e-8efc9a8a8612",
+        "chatSessionId": "sess_4023ec58-bf52-4566-b6fe-e9c8118bf939",
+        "timestamp": 1786125375882
+      },
+      {
+        "executionId": "e1677cf1-6712-408e-851a-24677fcad02a",
+        "chatSessionId": "sess_c758b2e9-d6f0-4f73-8610-046cb5fe9a24",
+        "timestamp": 1786128250678
+      }
+    ],
+    "4.1 Implement tier-aware accrual calculation and skip policy.": [
+      {
+        "executionId": "134c5128-d629-4c74-8e9e-8efc9a8a8612",
+        "chatSessionId": "sess_4023ec58-bf52-4566-b6fe-e9c8118bf939",
+        "timestamp": 1786125375912
+      },
+      {
+        "executionId": "e1677cf1-6712-408e-851a-24677fcad02a",
+        "chatSessionId": "sess_c758b2e9-d6f0-4f73-8610-046cb5fe9a24",
+        "timestamp": 1786128250718
+      }
+    ],
+    "4.2 Implement accrual command and idempotency persistence.": [
+      {
+        "executionId": "134c5128-d629-4c74-8e9e-8efc9a8a8612",
+        "chatSessionId": "sess_4023ec58-bf52-4566-b6fe-e9c8118bf939",
+        "timestamp": 1786125375948
+      },
+      {
+        "executionId": "e1677cf1-6712-408e-851a-24677fcad02a",
+        "chatSessionId": "sess_c758b2e9-d6f0-4f73-8610-046cb5fe9a24",
+        "timestamp": 1786128250754
+      }
+    ],
+    "4.3 Implement mandatory Property 4 test.": [
+      {
+        "executionId": "134c5128-d629-4c74-8e9e-8efc9a8a8612",
+        "chatSessionId": "sess_4023ec58-bf52-4566-b6fe-e9c8118bf939",
+        "timestamp": 1786125376012
+      },
+      {
+        "executionId": "e1677cf1-6712-408e-851a-24677fcad02a",
+        "chatSessionId": "sess_c758b2e9-d6f0-4f73-8610-046cb5fe9a24",
+        "timestamp": 1786128250804
+      }
+    ],
+    "4.4 Implement mandatory Property 5 test.": [
+      {
+        "executionId": "134c5128-d629-4c74-8e9e-8efc9a8a8612",
+        "chatSessionId": "sess_4023ec58-bf52-4566-b6fe-e9c8118bf939",
+        "timestamp": 1786125376038
+      },
+      {
+        "executionId": "e1677cf1-6712-408e-851a-24677fcad02a",
+        "chatSessionId": "sess_c758b2e9-d6f0-4f73-8610-046cb5fe9a24",
+        "timestamp": 1786128250873
+      }
+    ],
+    "4.5 Checkpoint: verify accrual.": [
+      {
+        "executionId": "134c5128-d629-4c74-8e9e-8efc9a8a8612",
+        "chatSessionId": "sess_4023ec58-bf52-4566-b6fe-e9c8118bf939",
+        "timestamp": 1786125376067
+      },
+      {
+        "executionId": "e1677cf1-6712-408e-851a-24677fcad02a",
+        "chatSessionId": "sess_c758b2e9-d6f0-4f73-8610-046cb5fe9a24",
+        "timestamp": 1786128250910
+      }
+    ],
+    "5.1 Implement the API client and read components.": [
+      {
+        "executionId": "134c5128-d629-4c74-8e9e-8efc9a8a8612",
+        "chatSessionId": "sess_4023ec58-bf52-4566-b6fe-e9c8118bf939",
+        "timestamp": 1786125376096
+      },
+      {
+        "executionId": "e1677cf1-6712-408e-851a-24677fcad02a",
+        "chatSessionId": "sess_c758b2e9-d6f0-4f73-8610-046cb5fe9a24",
+        "timestamp": 1786128250951
+      }
+    ],
+    "5.2 Add direct/proxy contract and preflight tests.": [
+      {
+        "executionId": "134c5128-d629-4c74-8e9e-8efc9a8a8612",
+        "chatSessionId": "sess_4023ec58-bf52-4566-b6fe-e9c8118bf939",
+        "timestamp": 1786125376147
+      },
+      {
+        "executionId": "e1677cf1-6712-408e-851a-24677fcad02a",
+        "chatSessionId": "sess_c758b2e9-d6f0-4f73-8610-046cb5fe9a24",
+        "timestamp": 1786128250988
+      },
+      {
+        "executionId": "180a2666-7490-4571-80fb-e2bfaf8e64fa",
+        "chatSessionId": "sess_c758b2e9-d6f0-4f73-8610-046cb5fe9a24",
+        "timestamp": 1786129138121
+      }
+    ],
+    "5.3 Checkpoint: verify read UI and proxy.": [
+      {
+        "executionId": "134c5128-d629-4c74-8e9e-8efc9a8a8612",
+        "chatSessionId": "sess_4023ec58-bf52-4566-b6fe-e9c8118bf939",
+        "timestamp": 1786125376196
+      },
+      {
+        "executionId": "e1677cf1-6712-408e-851a-24677fcad02a",
+        "chatSessionId": "sess_c758b2e9-d6f0-4f73-8610-046cb5fe9a24",
+        "timestamp": 1786128251025
+      }
+    ],
+    "6.1 Implement posting UI with validation and recovery states.": [
+      {
+        "executionId": "134c5128-d629-4c74-8e9e-8efc9a8a8612",
+        "chatSessionId": "sess_4023ec58-bf52-4566-b6fe-e9c8118bf939",
+        "timestamp": 1786125376230
+      },
+      {
+        "executionId": "e1677cf1-6712-408e-851a-24677fcad02a",
+        "chatSessionId": "sess_c758b2e9-d6f0-4f73-8610-046cb5fe9a24",
+        "timestamp": 1786128251062
+      }
+    ],
+    "6.2 Implement reversal UI and conflict preservation.": [
+      {
+        "executionId": "134c5128-d629-4c74-8e9e-8efc9a8a8612",
+        "chatSessionId": "sess_4023ec58-bf52-4566-b6fe-e9c8118bf939",
+        "timestamp": 1786125376263
+      },
+      {
+        "executionId": "e1677cf1-6712-408e-851a-24677fcad02a",
+        "chatSessionId": "sess_c758b2e9-d6f0-4f73-8610-046cb5fe9a24",
+        "timestamp": 1786128251103
+      }
+    ],
+    "6.3 Implement the mandatory Canonical_E2E flow.": [
+      {
+        "executionId": "134c5128-d629-4c74-8e9e-8efc9a8a8612",
+        "chatSessionId": "sess_4023ec58-bf52-4566-b6fe-e9c8118bf939",
+        "timestamp": 1786125376297
+      },
+      {
+        "executionId": "e1677cf1-6712-408e-851a-24677fcad02a",
+        "chatSessionId": "sess_c758b2e9-d6f0-4f73-8610-046cb5fe9a24",
+        "timestamp": 1786128251143
+      }
+    ],
+    "6.4 Checkpoint: verify full browser workflow.": [
+      {
+        "executionId": "134c5128-d629-4c74-8e9e-8efc9a8a8612",
+        "chatSessionId": "sess_4023ec58-bf52-4566-b6fe-e9c8118bf939",
+        "timestamp": 1786125376337
+      },
+      {
+        "executionId": "e1677cf1-6712-408e-851a-24677fcad02a",
+        "chatSessionId": "sess_c758b2e9-d6f0-4f73-8610-046cb5fe9a24",
+        "timestamp": 1786128251180
+      }
+    ],
+    "7.1 Add bounded Compose smoke and performance tests.": [
+      {
+        "executionId": "134c5128-d629-4c74-8e9e-8efc9a8a8612",
+        "chatSessionId": "sess_4023ec58-bf52-4566-b6fe-e9c8118bf939",
+        "timestamp": 1786125376369
+      },
+      {
+        "executionId": "e1677cf1-6712-408e-851a-24677fcad02a",
+        "chatSessionId": "sess_c758b2e9-d6f0-4f73-8610-046cb5fe9a24",
+        "timestamp": 1786128251219
+      }
+    ],
+    "7.2 Enforce declared coverage gates.": [
+      {
+        "executionId": "134c5128-d629-4c74-8e9e-8efc9a8a8612",
+        "chatSessionId": "sess_4023ec58-bf52-4566-b6fe-e9c8118bf939",
+        "timestamp": 1786125376397
+      },
+      {
+        "executionId": "e1677cf1-6712-408e-851a-24677fcad02a",
+        "chatSessionId": "sess_c758b2e9-d6f0-4f73-8610-046cb5fe9a24",
+        "timestamp": 1786128251259
+      }
+    ],
+    "7.3 Final blocking verification.": [
+      {
+        "executionId": "134c5128-d629-4c74-8e9e-8efc9a8a8612",
+        "chatSessionId": "sess_4023ec58-bf52-4566-b6fe-e9c8118bf939",
+        "timestamp": 1786125376432
+      },
+      {
+        "executionId": "e1677cf1-6712-408e-851a-24677fcad02a",
+        "chatSessionId": "sess_c758b2e9-d6f0-4f73-8610-046cb5fe9a24",
+        "timestamp": 1786128251294
+      }
+    ],
+    "0.3 Establish test-layer layout and the dedicated Playwright runner.": [
+      {
+        "executionId": "e1677cf1-6712-408e-851a-24677fcad02a",
+        "chatSessionId": "sess_c758b2e9-d6f0-4f73-8610-046cb5fe9a24",
+        "timestamp": 1786128250080
+      },
+      {
+        "executionId": "180a2666-7490-4571-80fb-e2bfaf8e64fa",
+        "chatSessionId": "sess_c758b2e9-d6f0-4f73-8610-046cb5fe9a24",
+        "timestamp": 1786129141324
+      },
+      {
+        "executionId": "78f05803-da41-4f91-9f9d-8e8986f509f2",
+        "chatSessionId": "sess_c758b2e9-d6f0-4f73-8610-046cb5fe9a24",
+        "timestamp": 1786129274132
+      },
+      {
+        "executionId": "40b2d893-6754-48bc-929d-83393ea34c3a",
+        "chatSessionId": "sess_c758b2e9-d6f0-4f73-8610-046cb5fe9a24",
+        "timestamp": 1786129434173
+      },
+      {
+        "executionId": "ac2706b9-dddb-4bf4-9b33-b059800d0635",
+        "chatSessionId": "sess_c758b2e9-d6f0-4f73-8610-046cb5fe9a24",
+        "timestamp": 1786129618849
+      },
+      {
+        "executionId": "ac2706b9-dddb-4bf4-9b33-b059800d0635",
+        "chatSessionId": "sess_c758b2e9-d6f0-4f73-8610-046cb5fe9a24",
+        "timestamp": 1786129711122
+      }
+    ]
+  }
+}

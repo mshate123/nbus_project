@@ -1,0 +1,23 @@
+# Edge Cases and Failure Modes
+
+- Decimal amount has exactly four places: accepted; five places: rejected without write.
+- Decimal amount is zero on either side: reject a zero-value line; do not permit an all-zero entry.
+- A line has both debit and credit positive: reject.
+- Entry has one line or no lines: reject.
+- Debit/credit totals differ by one smallest unit: reject atomically.
+- Account UUID is syntactically invalid: 422; valid but absent: 404.
+- Inactive account is referenced: reject according to application policy with stable 422 error.
+- Account has invalid tier or normal balance: migration/schema rejects it.
+- Balance is exactly zero: no positive accrual.
+- Balance is negative: skip accrual with deterministic reason.
+- Accrual date is repeated: no second row or money movement.
+- Accrual tier is changed before a later date: later run uses current account tier; prior entry remains immutable.
+- Entry is missing, draft, a reversal, or already reversed: reversal does not mutate and returns 404/409 as contract specifies.
+- Concurrent posts share accounts in different request order: deterministic locks avoid deadlock and preserve totals.
+- Database commit fails after flush: rollback leaves no partial rows and API returns non-sensitive 500.
+- API bearer is missing, malformed, or wrong: 401; health/readiness remain callable.
+- Proxy backend direct route is healthy but nginx route fails: preflight identifies proxy failure, not backend failure.
+- Host has Playwright package but no Chromium: host run is unsupported/noncanonical; container run supplies browser.
+- Frontend receives empty accounts/rates: explicit empty state, not blank screen.
+- Frontend request fails: error state with retry, no stale false success.
+- Mobile viewport: line editor and statement remain readable without relying on browser defaults.

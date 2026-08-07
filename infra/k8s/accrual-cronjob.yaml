@@ -1,0 +1,54 @@
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: accrual-daily
+  namespace: nbus-ledger
+spec:
+  # Run at 00:00 UTC every day
+  schedule: "0 0 * * *"
+  concurrencyPolicy: Forbid
+  successfulJobsHistoryLimit: 3
+  failedJobsHistoryLimit: 3
+  jobTemplate:
+    spec:
+      backoffLimit: 3
+      activeDeadlineSeconds: 3600
+      template:
+        spec:
+          serviceAccountName: accrual
+          containers:
+          - name: accrual
+            image: nbus-ledger-api:latest
+            imagePullPolicy: Never
+            command:
+            - python
+            - -m
+            - backend.jobs.accrual
+            env:
+            - name: DATABASE_URL
+              valueFrom:
+                configMapKeyRef:
+                  name: ledger-config
+                  key: database-url
+            - name: AWS_ENDPOINT_URL
+              valueFrom:
+                configMapKeyRef:
+                  name: ledger-config
+                  key: aws-endpoint-url
+            - name: AWS_ACCESS_KEY_ID
+              valueFrom:
+                secretKeyRef:
+                  name: ledger-secrets
+                  key: aws-access-key-id
+            - name: AWS_SECRET_ACCESS_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: ledger-secrets
+                  key: aws-secret-access-key
+          restartPolicy: OnFailure
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: accrual
+  namespace: nbus-ledger

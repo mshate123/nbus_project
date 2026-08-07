@@ -1,0 +1,9 @@
+# Reverse-engineering source
+
+This mission consumes the existing recon package at:
+
+`/Users/heathernoe/Desktop/gitrep/nbus_project/.specship/artifacts/reverse-engineering/`
+
+Primary handoff: `brownfield-contract-inputs.md`
+
+Relevant RCA: `e2e-triage.md` confirms nginx `proxy_pass http://api:8000/` stripped `/api/`, producing frontend 404 for `/api/rate-schedule` while the direct backend route returned 200; the same artifact confirms host Playwright lacked Chromium and the containerized frontend test image is the canonical browser environment.
