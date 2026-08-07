@@ -10,20 +10,30 @@ Endpoints:
 - GET  /api/rate-schedule                   — interest rate tiers
 """
 
-from decimal import Decimal
 from uuid import UUID
 from typing import AsyncIterator, List
-from datetime import datetime
 
 from fastapi import APIRouter, HTTPException, Request, status, Depends
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
-from pydantic import BaseModel, Field
 
 from models import Account, RateSchedule
+from domain.money import Money
+from domain.posting import PostingLine
 from engine.posting_service import PostingService, PostingError
 from engine.balance_service import BalanceService
 from engine.reversal_service import ReversalService, ReversalError
+from api.schemas import (
+    AccountResponse,
+    AccountStatementResponse,
+    BalanceResponse,
+    JournalEntryResponse,
+    JournalLineRequest,
+    JournalLineResponse,
+    PostJournalEntryRequest,
+    RateScheduleResponse,
+    StatementLineResponse,
+)
 
 router = APIRouter(prefix="/api", tags=["ledger"])
 
@@ -55,88 +65,17 @@ async def get_session(request: Request) -> AsyncIterator[AsyncSession]:
             raise
 
 
-# ── Pydantic schemas ──────────────────────────────────────────────────────────
-
-
-class JournalLineRequest(BaseModel):
-    account_id: UUID = Field(..., description="Account UUID")
-    debit: Decimal = Field(default=Decimal("0"), ge=0)
-    credit: Decimal = Field(default=Decimal("0"), ge=0)
-
-
-class PostJournalEntryRequest(BaseModel):
-    lines: List[JournalLineRequest] = Field(..., min_length=2)
-
-
-class JournalLineResponse(BaseModel):
-    id: str
-    account_id: str
-    debit: str
-    credit: str
-
-    class Config:
-        from_attributes = True
-
-
-class JournalEntryResponse(BaseModel):
-    id: str
-    status: str
-    posted_at: datetime | None
-    reversal_of_id: str | None
-    is_accrual: bool
-    lines: List[JournalLineResponse]
-    created_at: datetime
-
-    class Config:
-        from_attributes = True
-
-
-class BalanceResponse(BaseModel):
-    account_id: str
-    balance: str
-
-
-class StatementLineResponse(BaseModel):
-    entry_id: str
-    posted_at: datetime
-    debit: str
-    credit: str
-    running_balance: str
-    reversal_of_id: str | None = None
-
-
-class AccountStatementResponse(BaseModel):
-    account_id: str
-    lines: List[StatementLineResponse]
-
-
-class AccountResponse(BaseModel):
-    id: str
-    code: str
-    name: str
-    type: str
-    normal_balance: str
-    active: bool
-
-    class Config:
-        from_attributes = True
-
-
-class RateScheduleResponse(BaseModel):
-    tier: str
-    annual_rate: str
-
-    class Config:
-        from_attributes = True
-
-
 # ── Endpoints ─────────────────────────────────────────────────────────────────
 
 
 @router.get("/accounts", response_model=List[AccountResponse])
-async def list_accounts(session: AsyncSession = Depends(get_session)):
-    """List all accounts."""
-    stmt = select(Account).order_by(Account.code)
+async def list_accounts(
+    limit: int = 100,
+    offset: int = 0,
+    session: AsyncSession = Depends(get_session),
+):
+    """List all accounts with optional pagination."""
+    stmt = select(Account).order_by(Account.code).offset(offset).limit(limit)
     results = await session.scalars(stmt)
     return [
         AccountResponse(
@@ -145,6 +84,7 @@ async def list_accounts(session: AsyncSession = Depends(get_session)):
             name=a.name,
             type=a.type.value,
             normal_balance=a.normal_balance,
+            rate_tier=a.rate_tier,
             active=a.active,
         )
         for a in results
@@ -165,11 +105,11 @@ async def post_journal_entry(
     Returns 422 if unbalanced or invalid, 201 on success.
     """
     lines = [
-        {
-            "account_id": line.account_id,
-            "debit": line.debit,
-            "credit": line.credit,
-        }
+        PostingLine(
+            account_id=line.account_id,
+            debit=Money(line.debit),
+            credit=Money(line.credit),
+        )
         for line in req.lines
     ]
 
@@ -207,7 +147,7 @@ async def post_journal_entry(
     status_code=status.HTTP_201_CREATED,
 )
 async def reverse_entry(
-    entry_id: str,
+    entry_id: UUID,
     session: AsyncSession = Depends(get_session),
 ):
     """
@@ -259,14 +199,22 @@ async def get_account_balance(
 @router.get("/accounts/{account_id}/statement", response_model=AccountStatementResponse)
 async def get_account_statement(
     account_id: UUID,
+    limit: int = 100,
+    offset: int = 0,
     session: AsyncSession = Depends(get_session),
 ):
     """
-    Account statement: all POSTED entries in date order with running balance.
+    Account statement: POSTED entries in date order with running balance.
+    Supports limit/offset pagination.
     """
-    lines = await BalanceService.get_statement(session, account_id)
+    lines, total = await BalanceService.get_statement(
+        session, account_id, limit=limit, offset=offset
+    )
     return AccountStatementResponse(
         account_id=str(account_id),
+        total=total,
+        limit=limit,
+        offset=offset,
         lines=[
             StatementLineResponse(
                 entry_id=str(row["entry_id"]),

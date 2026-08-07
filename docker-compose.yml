@@ -14,7 +14,7 @@ services:
       POSTGRES_PASSWORD: ledger
       POSTGRES_DB: ledger
     ports:
-      - "5432:5432"
+      - "127.0.0.1:5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
       - ./docker/postgres-init:/docker-entrypoint-initdb.d:ro
@@ -23,17 +23,6 @@ services:
       interval: 5s
       timeout: 5s
       retries: 5
-
-  localstack:
-    image: localstack/localstack:3
-    environment:
-      SERVICES: s3
-      DEFAULT_REGION: us-east-1
-      LOCALSTACK_HOST: localstack
-    ports:
-      - "4566:4566"
-    volumes:
-      - localstack_data:/var/lib/localstack
 
   # ── App stack (profile: app) ─────────────────────────────────────────────
 
@@ -45,10 +34,6 @@ services:
       target: app
     environment:
       DATABASE_URL: postgresql+asyncpg://ledger:ledger@postgres:5432/ledger
-      AWS_ENDPOINT_URL: http://localstack:4566
-      AWS_DEFAULT_REGION: us-east-1
-      AWS_ACCESS_KEY_ID: test
-      AWS_SECRET_ACCESS_KEY: test
       AUTH_STUB_TOKEN: dev-token
     ports:
       - "8000:8000"
@@ -77,11 +62,7 @@ services:
       target: test
     environment:
       DATABASE_URL: postgresql+asyncpg://ledger:ledger@postgres:5432/ledger_test
-      AWS_ENDPOINT_URL: http://localstack:4566
-      AWS_DEFAULT_REGION: us-east-1
-      AWS_ACCESS_KEY_ID: test
-      AWS_SECRET_ACCESS_KEY: test
-    command: ["sh", "-c", "alembic upgrade head && pytest --cov=engine --cov-report=term-missing --cov-fail-under=20 -v"]
+    command: ["sh", "-c", "alembic upgrade head && pytest --cov=engine --cov-report=term-missing --cov-fail-under=70 -v"]
     depends_on:
       postgres:
         condition: service_healthy
@@ -110,4 +91,3 @@ services:
 
 volumes:
   postgres_data:
-  localstack_data:
