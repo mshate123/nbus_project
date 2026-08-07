@@ -148,16 +148,6 @@ The frontend `build` script runs TypeScript checking before creating the Vite pr
 ```bash
 docker compose --profile test run --rm frontend-test pnpm build
 ```
-
-Backend verification is provided by pytest collection and execution in the `api-test` image. The current backend manifest does not declare a separate mypy or pyright command. The current frontend manifest does not declare an ESLint script, and no repository-level lint script is configured. Therefore, there is no separate lint command to run from the current repository configuration; the README does not invent one.
-
-
-## Verification notes
-
-The Compose configuration, application startup, health endpoint, direct API, frontend proxy, backend tests, frontend tests, and containerized Playwright tests have been verified through the commands above. The specification files describe the complete ledger workflow and remain the source of task/acceptance detail; this README documents the repository's runnable entrypoints and does not restate task status.
-
-Kubernetes manifests under `infra/k8s/` and related scripts are retained for manual review. Docker Compose remains the canonical supported entrypoint for local application and test workflows.
-
 ## MY JOURNEY:
 
 I began by researching fintech project ideas with Claude and Gemini and chose to build a **Core Ledger & Interest Accrual** system. After the initial unit tests, integration tests, and application stack were healthy, further research led me to a public repository that demonstrated how to set up SpecShip for Kiro. I borrowed heavily from its templates, hooks, and MCPs for this exercise to reduce churn and unnecessary token usage.
