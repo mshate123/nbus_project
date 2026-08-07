@@ -15,8 +15,15 @@ The current Kiro specification and its contract/test artifacts are in `.kiro/spe
 
 ## Prerequisites
 
+For the documented Docker Compose workflow:
+
 - Docker Engine with the Compose plugin (`docker compose`)
 - Ports 3000, 4566, 5432, and 8000 available
+
+No host Python, Node.js, or pnpm installation is required; the Compose images provide them. If you run frontend commands directly on the host instead of through Docker, install:
+
+- Node.js 26.x (the frontend image uses `node:26-bookworm-slim`)
+- pnpm 11.20.0 (declared by `frontend/package.json`)
 
 ## Environment
 
