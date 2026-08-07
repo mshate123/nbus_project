@@ -1,4 +1,12 @@
-"""Own the deterministic production chart, rates, and demo ledger entries."""
+"""Own the deterministic production chart, rates, and demo ledger entries.
+
+NOTE: This migration imports and calls `seed.seed_database()` at migration time.
+This is an intentional coupling — the seed logic is idempotent and deterministic,
+so replaying migrations produces the same result. However, if `seed.py` ever gains
+non-deterministic behavior, external dependencies, or schema-incompatible changes,
+this migration will break on replay. If that becomes a concern, inline the SQL
+directly into this migration's upgrade() function.
+"""
 
 from alembic import op
 

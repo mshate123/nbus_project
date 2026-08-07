@@ -10,12 +10,13 @@ Invariants enforced:
 
 from decimal import Decimal
 from datetime import datetime, timezone
-from typing import List, Dict, Any
+from typing import List
 from uuid import UUID
 
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from domain.posting import PostingLine, validate_posting, PostingValidationError
 from models import JournalEntry, JournalLine, Account, EntryStatus
 
 
@@ -29,56 +30,24 @@ class PostingService:
     """Double-entry ledger posting engine."""
 
     @staticmethod
-    async def validate_entry(lines: List[Dict[str, Any]]) -> None:
+    async def validate_entry(lines: List[PostingLine]) -> None:
         """
         Validate journal entry lines for balance and structure.
 
-        Raises PostingError if:
-          - fewer than 2 lines
-          - amounts have >4 decimal places
-          - a line has both debit and credit non-zero
-          - sum(debits) != sum(credits)
-          - total amount is zero
+        Delegates to the domain layer's strict immutable validation.
+        Raises PostingError on failure.
         """
-        if len(lines) < 2:
-            raise PostingError("Entry must have at least 2 lines")
-
-        total_debit = Decimal("0.0000")
-        total_credit = Decimal("0.0000")
-
-        for line in lines:
-            debit = Decimal(str(line.get("debit", 0)))
-            credit = Decimal(str(line.get("credit", 0)))
-
-            # Validate precision: at most 4 decimal places
-            if debit < 0 or credit < 0:
-                raise PostingError("Amounts cannot be negative")
-            if debit != 0 and debit.as_tuple().exponent < -4:
-                raise PostingError("Amounts must have at most 4 decimal places")
-            if credit != 0 and credit.as_tuple().exponent < -4:
-                raise PostingError("Amounts must have at most 4 decimal places")
-
-            # A single line cannot have both debit and credit
-            if debit != Decimal("0") and credit != Decimal("0"):
-                raise PostingError("A line cannot have both debit and credit")
-
-            total_debit += debit
-            total_credit += credit
-
-        if total_debit != total_credit:
-            raise PostingError(
-                f"Entry is unbalanced: debits ({total_debit}) != credits ({total_credit})"
-            )
-
-        if total_debit == Decimal("0"):
-            raise PostingError("Entry total must be greater than 0")
+        try:
+            validate_posting(lines)
+        except (PostingValidationError, TypeError) as exc:
+            raise PostingError(str(exc)) from exc
 
     @staticmethod
     async def post_entry(
         session: AsyncSession,
-        lines: List[Dict[str, Any]],
+        lines: List[PostingLine],
         is_accrual: bool = False,
-        accrual_account_id: str | None = None,
+        accrual_account_id: UUID | None = None,
         accrual_date=None,
     ) -> JournalEntry:
         """
@@ -89,13 +58,10 @@ class PostingService:
 
         Returns the posted JournalEntry ORM instance.
         """
-        # Validate structure and balance
+        # Validate structure and balance via domain layer
         await PostingService.validate_entry(lines)
 
-        try:
-            account_ids = sorted({UUID(str(line["account_id"])) for line in lines})
-        except (KeyError, ValueError, TypeError) as exc:
-            raise PostingError("Each line must contain a valid account UUID") from exc
+        account_ids = sorted({line.account_id for line in lines})
 
         # Acquire row-level locks on accounts in sorted order
         stmt = (
@@ -125,12 +91,12 @@ class PostingService:
         await session.flush()  # Get entry.id
 
         # Create journal lines
-        for line_data in lines:
+        for line in lines:
             jl = JournalLine(
                 entry_id=entry.id,
-                account_id=UUID(str(line_data["account_id"])),
-                debit=Decimal(str(line_data.get("debit", 0))),
-                credit=Decimal(str(line_data.get("credit", 0))),
+                account_id=line.account_id,
+                debit=line.debit.value,
+                credit=line.credit.value,
             )
             session.add(jl)
 

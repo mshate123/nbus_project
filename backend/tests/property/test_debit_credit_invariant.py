@@ -7,10 +7,14 @@ the sum(debits) == sum(credits) invariant holds after posting.
 This is a merge gate for posting_service.
 """
 
+import uuid
 from decimal import Decimal
 
 import pytest
 from hypothesis import given, strategies as st
+
+from domain.money import Money
+from domain.posting import PostingLine
 from engine.posting_service import PostingService
 
 
@@ -38,25 +42,29 @@ async def test_balanced_entry_invariant(amounts):
     total_debits = sum(debit_amounts)
     credit_amount = total_debits  # Ensure balance
 
-    # Build entry
+    # Build entry with typed PostingLine objects
     lines = [
-        {"account_id": f"acc-{i}", "debit": amt, "credit": Decimal("0")}
-        for i, amt in enumerate(debit_amounts)
+        PostingLine(
+            account_id=uuid.uuid4(),
+            debit=Money(amt),
+            credit=Money.zero(),
+        )
+        for amt in debit_amounts
     ]
     lines.append(
-        {
-            "account_id": "acc-credit",
-            "debit": Decimal("0"),
-            "credit": credit_amount,
-        }
+        PostingLine(
+            account_id=uuid.uuid4(),
+            debit=Money.zero(),
+            credit=Money(credit_amount),
+        )
     )
 
     # Validate (should not raise)
     await PostingService.validate_entry(lines)
 
     # Verify invariant: sum(debits) == sum(credits)
-    sum_debits = sum(Decimal(str(line.get("debit", 0))) for line in lines)
-    sum_credits = sum(Decimal(str(line.get("credit", 0))) for line in lines)
+    sum_debits = sum(line.debit.value for line in lines)
+    sum_credits = sum(line.credit.value for line in lines)
 
     assert (
         sum_debits == sum_credits
@@ -81,29 +89,29 @@ async def test_multi_line_balanced_entries(num_lines, base_amount):
     for i in range(num_lines - 1):
         amount = (base_amount * Decimal(i + 1)).quantize(Decimal("0.0001"))
         lines.append(
-            {
-                "account_id": f"acc-{i}",
-                "debit": amount,
-                "credit": Decimal("0"),
-            }
+            PostingLine(
+                account_id=uuid.uuid4(),
+                debit=Money(amount),
+                credit=Money.zero(),
+            )
         )
         total_debit += amount
 
     # Last line credits the total
     lines.append(
-        {
-            "account_id": "acc-credit",
-            "debit": Decimal("0"),
-            "credit": total_debit,
-        }
+        PostingLine(
+            account_id=uuid.uuid4(),
+            debit=Money.zero(),
+            credit=Money(total_debit),
+        )
     )
 
     # Validate
     await PostingService.validate_entry(lines)
 
     # Verify invariant
-    sum_debits = sum(Decimal(str(line["debit"])) for line in lines)
-    sum_credits = sum(Decimal(str(line["credit"])) for line in lines)
+    sum_debits = sum(line.debit.value for line in lines)
+    sum_credits = sum(line.credit.value for line in lines)
 
     assert sum_debits == sum_credits
 
@@ -117,13 +125,18 @@ async def test_simple_two_line_entries(amount1):
     **Validates: Requirements 1.0 (US-1: Post a Balanced Journal Entry)**
     """
     lines = [
-        {"account_id": "acc-1", "debit": amount1, "credit": Decimal("0")},
-        {"account_id": "acc-2", "debit": Decimal("0"), "credit": amount1},
+        PostingLine(
+            account_id=uuid.uuid4(),
+            debit=Money(amount1),
+            credit=Money.zero(),
+        ),
+        PostingLine(
+            account_id=uuid.uuid4(),
+            debit=Money.zero(),
+            credit=Money(amount1),
+        ),
     ]
 
     await PostingService.validate_entry(lines)
 
-    sum_debits = Decimal(str(lines[0]["debit"]))
-    sum_credits = Decimal(str(lines[1]["credit"]))
-
-    assert sum_debits == sum_credits
+    assert lines[0].debit.value == lines[1].credit.value

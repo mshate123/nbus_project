@@ -8,8 +8,13 @@ Rules:
 - Reject reversal of non-POSTED entries (409).
 """
 
+from uuid import UUID
+
 from sqlalchemy import select
+from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
+from domain.money import Money
+from domain.posting import PostingLine
 from models import JournalEntry, JournalLine, EntryStatus
 from engine.posting_service import PostingService
 
@@ -26,7 +31,7 @@ class ReversalService:
     @staticmethod
     async def reverse_entry(
         session: AsyncSession,
-        entry_id: str,
+        entry_id: UUID,
     ) -> JournalEntry:
         """
         Reverse a POSTED entry by creating an offsetting entry.
@@ -69,19 +74,23 @@ class ReversalService:
 
         # Build reversing lines: swap debit/credit
         reversing_lines = [
-            {
-                "account_id": str(line.account_id),
-                "debit": line.credit,
-                "credit": line.debit,
-            }
+            PostingLine(
+                account_id=line.account_id,
+                debit=Money(line.credit),
+                credit=Money(line.debit),
+            )
             for line in original_lines
         ]
 
         # Post the reversing entry
         reversing_entry = await PostingService.post_entry(session, reversing_lines)
 
-        # Link to original
+        # Link to original — the unique partial index on reversal_of_id prevents
+        # concurrent double-reversals at the DB level.
         reversing_entry.reversal_of_id = original.id
-        await session.flush()
+        try:
+            await session.flush()
+        except IntegrityError:
+            raise ReversalError(f"Entry {entry_id} has already been reversed")
 
         return reversing_entry

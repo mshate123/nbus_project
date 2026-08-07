@@ -17,6 +17,8 @@ import asyncio
 from decimal import Decimal
 from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession, async_sessionmaker
 
+from domain.money import Money
+from domain.posting import PostingLine
 from models import Account, AccountType
 from engine.posting_service import PostingService
 from engine.balance_service import BalanceService
@@ -87,16 +89,16 @@ async def test_concurrent_posts_no_deadlock(test_db):
     async def post_entry(amount: Decimal, task_id: int):
         async with session_maker() as s:
             lines = [
-                {
-                    "account_id": str(test_account_id),
-                    "debit": amount,
-                    "credit": Decimal("0"),
-                },
-                {
-                    "account_id": str(reserve.id),
-                    "debit": Decimal("0"),
-                    "credit": amount,
-                },
+                PostingLine(
+                    account_id=test_account_id,
+                    debit=Money(amount),
+                    credit=Money.zero(),
+                ),
+                PostingLine(
+                    account_id=reserve.id,
+                    debit=Money.zero(),
+                    credit=Money(amount),
+                ),
             ]
             try:
                 entry = await PostingService.post_entry(s, lines)
@@ -119,7 +121,7 @@ async def test_concurrent_posts_no_deadlock(test_db):
 
     # Verify final balance
     async with session_maker() as s:
-        final_balance = await BalanceService.get_balance(s, str(test_account_id))
+        final_balance = await BalanceService.get_balance(s, test_account_id)
 
     # Asset account (DEBIT normal) should have: 10 * $100 = $1,000
     expected_balance = amount * Decimal("10")
@@ -165,16 +167,16 @@ async def test_concurrent_posts_ordered_locks(test_db):
     async def post_transfer(from_idx: int, to_idx: int, amount: Decimal):
         async with session_maker() as s:
             lines = [
-                {
-                    "account_id": str(accounts[from_idx].id),
-                    "debit": amount,
-                    "credit": Decimal("0"),
-                },
-                {
-                    "account_id": str(accounts[to_idx].id),
-                    "debit": Decimal("0"),
-                    "credit": amount,
-                },
+                PostingLine(
+                    account_id=accounts[from_idx].id,
+                    debit=Money(amount),
+                    credit=Money.zero(),
+                ),
+                PostingLine(
+                    account_id=accounts[to_idx].id,
+                    debit=Money.zero(),
+                    credit=Money(amount),
+                ),
             ]
             entry = await PostingService.post_entry(s, lines)
             await s.commit()
