@@ -139,7 +139,7 @@ docker compose --profile app --profile test run --rm e2e-test
 docker compose --profile app --profile test down -v
 ```
 
-The browser runner uses Chromium from its container image rather than a host browser cache. The repository-level Playwright configuration is in `e2e/playwright.config.ts`.
+The browser runner uses Chromium from its container image rather than a host browser cache. 
 
 ## Typecheck, build, and lint
 
@@ -148,11 +148,12 @@ The frontend `build` script runs TypeScript checking before creating the Vite pr
 ```bash
 docker compose --profile test run --rm frontend-test pnpm build
 ```
-## MY JOURNEY:
+
+# MY JOURNEY:
 
 I began by researching fintech project ideas with Claude and Gemini and chose to build a **Core Ledger & Interest Accrual** system. After the initial unit tests, integration tests, and application stack were healthy, further research led me to a public repository that demonstrated how to set up SpecShip for Kiro. I borrowed heavily from its templates, hooks, and MCPs for this exercise to reduce churn and unnecessary token usage.
 
-I installed the SpecShip prerequisites and added Kiro Superpowers for brainstorming, writing implementation plans, subagent-driven development, TDD, and debugging. I then performed a repository reconnaissance and synthesized the findings back into the original codebase on a new branch from `main`.
+I installed the SpecShip prerequisites and added Kiro Superpowers for brainstorming, writing implementation plans, subagent-driven development, TDD, and debugging. I then performed a repository reconnaissance and synthesized the findings back into the original codebase.
 
 ### Reconnaissance prompt
 
@@ -164,7 +165,6 @@ I installed the SpecShip prerequisites and added Kiro Superpowers for brainstorm
 > 2. Existing Kiro specs in `.kiro/specs/`, cross-referenced against current implementation gaps.
 > 3. Dead code, anti-patterns, technical debt, and components that should be restructured or removed.
 > 4. Baseline behaviors to preserve versus legacy structures to retire.
-
 The reconnaissance identified a Playwright E2E routing issue that caused the browser test to fail. I recorded it as a follow-up triage task so the recon could be completed without losing the finding. I later used Kiro's investigation workflow to create an RCA triage issue, then incorporated the triage fix into Spec mode while rewriting the specifications.
 
 ### Test organization
@@ -176,14 +176,15 @@ backend/tests/
   property/
   api/
   fixtures/
-
 frontend/tests/
   unit/
     components/
-
 e2e/
   helpers/
   playwright.config.ts
+  preflight.spec.ts
+  smoke.spec.ts
+```
 ```
 
 I used TDD with red/green test cycles and organized the project around open-source tooling, including Minikube and LocalStack, to avoid cloud-provider costs. I worked through the infrastructure decisions and chose nginx plus layered Docker Compose profiles for the application and test stacks.
