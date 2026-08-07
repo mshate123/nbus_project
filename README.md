@@ -157,7 +157,7 @@ Kubernetes manifests under `infra/k8s/` and related scripts are retained for man
 
 ## MY JOURNEY:
 
-I began by researching fintech project ideas with Claude and Gemini and chose to build a **Core Ledger & Interest Accrual** system. After the initial unit tests, integration tests, and application stack were healthy, further research led me to a public repository that demonstrated how to set up SpecShip for Kiro. I borrowed heavily from its templates, hooks, and Playwright MCP setup for this exercise to reduce churn and unnecessary token usage.
+I began by researching fintech project ideas with Claude and Gemini and chose to build a **Core Ledger & Interest Accrual** system. After the initial unit tests, integration tests, and application stack were healthy, further research led me to a public repository that demonstrated how to set up SpecShip for Kiro. I borrowed heavily from its templates, hooks, and MCPs for this exercise to reduce churn and unnecessary token usage.
 
 I installed the SpecShip prerequisites and added Kiro Superpowers for brainstorming, writing implementation plans, subagent-driven development, TDD, and debugging. I then performed a repository reconnaissance and synthesized the findings back into the original codebase on a new branch from `main`.
 
