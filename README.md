@@ -76,41 +76,45 @@ docker compose --profile app up -d --build
 
 ## Tests
 
-All commands use the Compose `test` profile. The backend test image applies Alembic migrations before running pytest.
+### Run all tests
 
-### Backend unit tests
-
-```bash
-docker compose --profile test run --rm api-test pytest tests/unit -q
-```
-
-### Backend integration and database tests
+This single command starts the app stack for E2E tests, runs the full backend/API suite, runs the frontend suite, runs E2E tests, and removes the test containers and volumes when finished:
 
 ```bash
-docker compose --profile test run --rm api-test pytest tests/integration -q
+docker compose --profile app up -d --build && docker compose --profile test run --rm api-test && docker compose --profile test run --rm frontend-test && docker compose --profile app --profile test run --rm e2e-test; status=$?; docker compose --profile app --profile test down -v; exit $status
 ```
 
-### Backend property tests
+This command was verified successfully in the current repository.
 
-```bash
-docker compose --profile test run --rm api-test pytest tests/property -q
-```
+### Run individual suites
 
-### API contract-shape tests
+#### Backend/API tests
 
-The API contract tests are located in `backend/tests/api/`; there is no separate Compose service named `contract-test`.
-
-```bash
-docker compose --profile test run --rm api-test pytest tests/api -q
-```
-
-### Full backend suite
+Run the full backend suite, including unit, integration, property, and API contract-shape tests:
 
 ```bash
 docker compose --profile test run --rm api-test
 ```
 
-### Frontend unit/component tests
+To run an individual backend suite:
+
+```bash
+# Unit tests
+docker compose --profile test run --rm api-test pytest tests/unit -q
+
+# Integration and database tests
+docker compose --profile test run --rm api-test pytest tests/integration -q
+
+# Property tests
+docker compose --profile test run --rm api-test pytest tests/property -q
+
+# API contract-shape tests
+docker compose --profile test run --rm api-test pytest tests/api -q
+```
+
+The API contract tests are located in `backend/tests/api/`; there is no separate Compose service named `contract-test`.
+
+#### Frontend tests
 
 ```bash
 docker compose --profile test run --rm frontend-test
@@ -118,13 +122,14 @@ docker compose --profile test run --rm frontend-test
 
 The current frontend suite is Vitest-based and is discovered from `frontend/tests/`.
 
-### E2E tests
+#### E2E tests
 
 Start the app stack first, then run the dedicated browser container:
 
 ```bash
 docker compose --profile app up -d --build
 docker compose --profile app --profile test run --rm e2e-test
+docker compose --profile app --profile test down -v
 ```
 
 The browser runner uses Chromium from its container image rather than a host browser cache. The repository-level Playwright configuration is in `e2e/playwright.config.ts`.
@@ -139,15 +144,6 @@ docker compose --profile test run --rm frontend-test pnpm build
 
 Backend verification is provided by pytest collection and execution in the `api-test` image. The current backend manifest does not declare a separate mypy or pyright command. The current frontend manifest does not declare an ESLint script, and no repository-level lint script is configured. Therefore, there is no separate lint command to run from the current repository configuration; the README does not invent one.
 
-## Migration history
-
-The migration revision chain is unchanged:
-
-1. `001_initial`
-2. `002_ledger_rewrite`
-3. `003_seed_ledger`
-
-The cleanup changed only the Kiro specification directory name to `core-ledger`; migration revision identifiers, ordering, and dependency semantics were not changed.
 
 ## Verification notes
 
