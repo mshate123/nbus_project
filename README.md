@@ -160,7 +160,8 @@ I installed the SpecShip prerequisites and added Kiro Superpowers for brainstorm
 > 2. Existing Kiro specs in `.kiro/specs/`, cross-referenced against current implementation gaps.
 > 3. Dead code, anti-patterns, technical debt, and components that should be restructured or removed.
 > 4. Baseline behaviors to preserve versus legacy structures to retire.
-The reconnaissance identified a Playwright E2E routing issue that caused the browser test to fail. I recorded it as a follow-up triage task so the recon could be completed without losing the finding. I later used Kiro's investigation workflow to create an RCA triage issue, then incorporated the triage fix into Spec mode while rewriting the specifications.
+
+The reconnaissance identified a Playwright E2E routing issue that caused the browser test to fail. I recorded it as a follow-up triage task so the recon could be completed without losing the finding. I later used Kiro's investigation workflow to create an RCA triage issue, then incorporated the triage fix into Spec mode while rewriting the specifications. Finally, I switched to another model to perform rubberduck code reviews, fixed all found issues and added final polish.
 
 ### Test organization
 
@@ -181,9 +182,7 @@ e2e/
   smoke.spec.ts
 ```
 
-
-I used TDD with red/green testing guardrails and organized the project around Docker Compose profiles for the application and test stacks.
-I switched to another model to perform code reviews, fixed all found issues and added final polish.
+The final stack verification confirmed healthy PostgreSQL, API, and frontend services; API health returned `{"status":"ok"}`; the frontend returned HTTP 200; and the frontend proxy returned the seeded rate schedule successfully.
 
 ### Coverage and remaining work
 
@@ -195,4 +194,3 @@ The application and test workflows run successfully, but the implementation has 
 
 The remaining backend coverage gap is `reversal_service` (36%). Frontend coverage requires additional component tests for `AccountList`, `AccountStatement`, and `App` to meet the 60% threshold.
 
-The final stack verification confirmed healthy PostgreSQL, API, and frontend services; API health returned `{"status":"ok"}`; the frontend returned HTTP 200; and the frontend proxy returned the seeded rate schedule successfully.
