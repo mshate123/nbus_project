@@ -164,7 +164,7 @@ The reconnaissance identified a Playwright E2E routing issue that caused the bro
 
 ### Test organization
 
-```text
+
 backend/tests/
   unit/
   integration/
@@ -182,7 +182,8 @@ e2e/
 ```
 ```
 
-I used TDD with red/green test cycles and organized the project around Docker Compose profiles for the application and test stacks.
+I used TDD with red/green testing guardrails and organized the project around Docker Compose profiles for the application and test stacks.
+I switched to another model to perform code reviews, fixed all found issues and added final polish.
 
 ### Coverage and remaining work
 
