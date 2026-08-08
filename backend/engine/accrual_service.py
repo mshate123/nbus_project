@@ -1,5 +1,6 @@
 """Daily interest accrual engine."""
 
+import logging
 from datetime import date
 from decimal import Decimal, ROUND_HALF_UP
 
@@ -7,7 +8,11 @@ from sqlalchemy import select
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from models import Account, RateSchedule
+logger = logging.getLogger(__name__)
+
+from domain.money import Money
+from domain.posting import PostingLine
+from models import Account, RateSchedule, NormalBalance
 from engine.balance_service import BalanceService
 from engine.posting_service import PostingService
 
@@ -30,12 +35,14 @@ class AccrualService:
         interest_income = await session.scalar(
             select(Account).where(Account.code == "4000")
         )
-        rate_row = await session.scalar(
-            select(RateSchedule).where(RateSchedule.tier == "standard")
-        )
-        annual_rate = (
-            Decimal(str(rate_row.annual_rate)) if rate_row else Decimal("0.035000")
-        )
+        # Load all rate tiers into a lookup map so each account uses its own rate.
+        rate_rows = (
+            await session.scalars(select(RateSchedule))
+        ).all()
+        rate_map = {
+            str(r.tier.value if hasattr(r.tier, "value") else r.tier): Decimal(str(r.annual_rate))
+            for r in rate_rows
+        }
         if interest_income is None:
             results["errors"].append("Interest income account 4000 is missing")
             return results
@@ -50,7 +57,15 @@ class AccrualService:
         for account in accounts:
             results["accounts_processed"] += 1
             try:
-                balance = await BalanceService.get_balance(session, str(account.id))
+                # Look up the rate for this account's tier; fall back to standard.
+                account_tier = str(
+                    account.rate_tier.value
+                    if hasattr(account.rate_tier, "value")
+                    else account.rate_tier
+                )
+                annual_rate = rate_map.get(account_tier, Decimal("0.035000"))
+
+                balance = await BalanceService.get_balance(session, account.id)
                 if balance <= 0:
                     continue
                 daily_interest = (balance * annual_rate / Decimal("365")).quantize(
@@ -61,31 +76,31 @@ class AccrualService:
 
                 # A liability/customer balance grows on the credit side; a debit-normal
                 # balance grows on the debit side. Interest expense/income is the offset.
-                if account.normal_balance == "CREDIT":
+                if account.normal_balance == NormalBalance.CREDIT:
                     lines = [
-                        {
-                            "account_id": str(interest_income.id),
-                            "debit": daily_interest,
-                            "credit": 0,
-                        },
-                        {
-                            "account_id": str(account.id),
-                            "debit": 0,
-                            "credit": daily_interest,
-                        },
+                        PostingLine(
+                            account_id=interest_income.id,
+                            debit=Money(daily_interest),
+                            credit=Money.zero(),
+                        ),
+                        PostingLine(
+                            account_id=account.id,
+                            debit=Money.zero(),
+                            credit=Money(daily_interest),
+                        ),
                     ]
                 else:
                     lines = [
-                        {
-                            "account_id": str(account.id),
-                            "debit": daily_interest,
-                            "credit": 0,
-                        },
-                        {
-                            "account_id": str(interest_income.id),
-                            "debit": 0,
-                            "credit": daily_interest,
-                        },
+                        PostingLine(
+                            account_id=account.id,
+                            debit=Money(daily_interest),
+                            credit=Money.zero(),
+                        ),
+                        PostingLine(
+                            account_id=interest_income.id,
+                            debit=Money.zero(),
+                            credit=Money(daily_interest),
+                        ),
                     ]
 
                 # Savepoint isolates a duplicate from earlier successful accounts.
@@ -94,13 +109,21 @@ class AccrualService:
                         session,
                         lines,
                         is_accrual=True,
-                        accrual_account_id=str(account.id),
+                        accrual_account_id=account.id,
                         accrual_date=accrual_date,
                     )
                 results["accruals_posted"] += 1
             except IntegrityError:
                 results["accruals_skipped"] += 1
             except Exception as exc:
+                logger.error(
+                    "Accrual failed for account %s (code=%s) on %s: %s",
+                    account.id,
+                    account.code,
+                    accrual_date,
+                    exc,
+                    exc_info=True,
+                )
                 results["errors"].append(f"Account {account.code}: {exc}")
 
         return results

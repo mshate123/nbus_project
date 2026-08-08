@@ -7,18 +7,19 @@ This eliminates drift bugs entirely.
 
 from decimal import Decimal
 from typing import List, Dict, Any
+from uuid import UUID
 
 from sqlalchemy import select, func, and_
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from models import JournalLine, Account, JournalEntry, EntryStatus
+from models import JournalLine, Account, JournalEntry, EntryStatus, NormalBalance
 
 
 class BalanceService:
     """Compute real-time account balances from journal lines."""
 
     @staticmethod
-    async def get_balance(session: AsyncSession, account_id: str) -> Decimal:
+    async def get_balance(session: AsyncSession, account_id: UUID) -> Decimal:
         """
         Compute account balance as SUM(journal_lines) at request time.
 
@@ -52,7 +53,7 @@ class BalanceService:
         total_debit = Decimal(str(row[0]))
         total_credit = Decimal(str(row[1]))
 
-        if account.normal_balance == "DEBIT":
+        if account.normal_balance == NormalBalance.DEBIT:
             balance = total_debit - total_credit
         else:
             balance = total_credit - total_debit
@@ -62,17 +63,35 @@ class BalanceService:
     @staticmethod
     async def get_statement(
         session: AsyncSession,
-        account_id: str,
-    ) -> List[Dict[str, Any]]:
+        account_id: UUID,
+        limit: int = 100,
+        offset: int = 0,
+    ) -> tuple[List[Dict[str, Any]], int]:
         """
-        Get account statement: all POSTED entries in date order with running balance.
+        Get account statement: POSTED entries in date order with running balance.
+        Supports limit/offset pagination.
 
-        Returns list of dicts with keys:
-          entry_id, posted_at, debit, credit, running_balance, reversal_of_id
+        Returns a tuple of (page_of_lines, total_count).
+        Running balance is computed from the start of the ledger so the windowed
+        rows still carry an accurate cumulative balance.
         """
         account = await session.get(Account, account_id)
         if not account:
-            return []
+            return [], 0
+
+        # Count total lines for this account.
+        count_stmt = (
+            select(func.count())
+            .select_from(JournalLine)
+            .join(JournalEntry, JournalLine.entry_id == JournalEntry.id)
+            .where(
+                and_(
+                    JournalLine.account_id == account_id,
+                    JournalEntry.status == EntryStatus.POSTED,
+                )
+            )
+        )
+        total = await session.scalar(count_stmt) or 0
 
         stmt = (
             select(
@@ -96,6 +115,7 @@ class BalanceService:
         result = await session.execute(stmt)
         rows = result.all()
 
+        # Compute running balance across ALL rows, then slice the window.
         statement: List[Dict[str, Any]] = []
         running_balance = Decimal("0.0000")
 
@@ -103,7 +123,7 @@ class BalanceService:
             debit = Decimal(str(row.debit)) if row.debit else Decimal("0.0000")
             credit = Decimal(str(row.credit)) if row.credit else Decimal("0.0000")
 
-            if account.normal_balance == "DEBIT":
+            if account.normal_balance == NormalBalance.DEBIT:
                 running_balance += debit - credit
             else:
                 running_balance += credit - debit
@@ -121,4 +141,6 @@ class BalanceService:
                 }
             )
 
-        return statement
+        # Apply the pagination window.
+        page = statement[offset : offset + limit]
+        return page, total

@@ -3,6 +3,7 @@
 from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
+from fastapi.responses import JSONResponse
 from sqlalchemy import text
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.ext.asyncio import async_sessionmaker, create_async_engine
@@ -34,14 +35,16 @@ def create_app(settings: Settings | None = None) -> FastAPI:
         return {"status": "ok"}
 
     @app.get("/ready")
-    async def ready() -> dict[str, str]:
+    async def ready() -> JSONResponse:
         """Return readiness only when the database accepts a query."""
         try:
             async with session_factory() as session:
                 await session.execute(text("SELECT 1"))
         except SQLAlchemyError:
-            return {"status": "unavailable"}
-        return {"status": "ok"}
+            return JSONResponse(
+                status_code=503, content={"status": "unavailable"}
+            )
+        return JSONResponse(status_code=200, content={"status": "ok"})
 
     return app
 
